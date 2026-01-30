@@ -1,0 +1,39 @@
+Add-Type @"
+  using System;
+  using System.Runtime.InteropServices;
+  public class WinApi {
+    [DllImport("user32.dll")]
+    public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+    [DllImport("user32.dll")]
+    public static extern IntPtr GetForegroundWindow();
+    public const int SW_MAXIMIZE = 3;
+  }
+"@
+
+# Maximize the current console window
+$null = [WinApi]::ShowWindow([WinApi]::GetForegroundWindow(), 3)
+
+$host.UI.RawUI.WindowTitle = "OMEGA-7 LOCK [STABLE]"
+$host.UI.RawUI.BackgroundColor = "Black"
+Clear-Host
+
+# Display placeholder markers in corners
+Write-Host "`n`n`n`n`n`n`n`n`n"
+Write-Host "                                                            [EAGLE_1]" -ForegroundColor Yellow -BackgroundColor DarkRed
+Write-Host "`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n"
+Write-Host "[EAGLE_2]" -ForegroundColor Yellow -BackgroundColor DarkRed -NoNewline
+Write-Host "                                                            [EAGLE_3]" -ForegroundColor Yellow -BackgroundColor DarkRed
+Write-Host "`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n"
+Write-Host "                                                            [EAGLE_4]" -ForegroundColor Yellow -BackgroundColor DarkRed
+
+# Core lock simulation message
+Write-Host "`n`n`n            [SYSTEM INPUT QUEUE DISRUPTED]" -ForegroundColor White -BackgroundColor DarkBlue
+Write-Host "            [STABLE CONTAINMENT PROTOCOL ACTIVE]" -ForegroundColor White -BackgroundColor DarkBlue
+Write-Host "            [ESCAPE VECTOR: TERMINATE PROCESS]" -ForegroundColor Cyan -BackgroundColor Black
+
+# STABLE LOOP: Includes a sleep command to prevent process crash
+$counter = 0
+while ($true) {
+    $counter++
+    Start-Sleep -Milliseconds 10  # This line prevents the crash
+}
