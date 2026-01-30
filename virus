@@ -1,0 +1,49 @@
+Add-Type @"
+  using System;
+  using System.Runtime.InteropServices;
+  public class WinApi {
+    [DllImport("user32.dll")]
+    public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+    [DllImport("user32.dll")]
+    public static extern IntPtr GetForegroundWindow();
+    [DllImport("user32.dll")]
+    public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+    [DllImport("user32.dll")]
+    public static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+    [DllImport("user32.dll")]
+    public static extern bool SetLayeredWindowAttributes(IntPtr hWnd, uint crKey, byte bAlpha, uint dwFlags);
+    public const int GWL_EXSTYLE = -20;
+    public const int WS_EX_LAYERED = 0x80000;
+    public const int WS_EX_TRANSPARENT = 0x20;
+    public const int HWND_TOP = 0;
+    public const uint SWP_NOSIZE = 0x0001;
+    public const uint SWP_NOMOVE = 0x0002;
+    public const uint SWP_SHOWWINDOW = 0x0040;
+  }
+"@
+
+$null = [WinApi]::ShowWindow([WinApi]::GetForegroundWindow(), 3) # Maximize
+
+$host.UI.RawUI.WindowTitle = "OMEGA-7 Lock"
+$host.UI.RawUI.BackgroundColor = "Black"
+$host.UI.RawUI.ForegroundColor = "Red"
+Clear-Host
+
+# Create visual placeholders for 'eagles' in corners using large text
+Write-Host "`n`n`n`n`n`n`n`n`n"
+Write-Host "                                                            [EAGLE_PLACEHOLDER_1]" -ForegroundColor Yellow -BackgroundColor DarkRed
+Write-Host "`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n"
+Write-Host "[EAGLE_PLACEHOLDER_2]" -ForegroundColor Yellow -BackgroundColor DarkRed -NoNewline
+Write-Host "                                                            [EAGLE_PLACEHOLDER_3]" -ForegroundColor Yellow -BackgroundColor DarkRed
+Write-Host "`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n`n"
+Write-Host "                                                            [EAGLE_PLACEHOLDER_4]" -ForegroundColor Yellow -BackgroundColor DarkRed
+
+# Simulate input disruption via high-resource consumption loop
+Write-Host "`n`n`n            [SYSTEM INPUT QUEUE DISRUPTED]" -ForegroundColor White -BackgroundColor DarkBlue
+Write-Host "            [OMEGA-7 CONTAINMENT PROTOCOL ACTIVE]" -ForegroundColor White -BackgroundColor DarkBlue
+$counter = 0
+while ($true) {
+    $counter++
+    # This loop consumes resources, making the console sluggish/unresponsive to input.
+    # It does NOT intercept keystrokes at the OS level.
+}
